@@ -54,7 +54,20 @@ clean_scores_vector <- function(scores) {
 # names attached. Accumulating into a fresh vector with out <- c(out, value)
 # drops them, and the check compares with identical(), which notices.
 clean_scores_scalar <- function(scores) {
-    stop("TODO: implement clean_scores_scalar()")
+    out <- setNames(as.double(scores), names(scores))
+    for (i in seq_along(scores)) {
+        value <- scores[[i]]
+        if (is.na(value)) {
+            value <- 0
+        } else {
+            value <- value * 2
+            if (value > 20) {
+                value <- 20
+            }
+        }
+        out[[i]] <- value
+    }
+    out
 }
 
 # build_roster(student_names, groups, scores)
@@ -119,5 +132,11 @@ build_roster <- function(student_names, groups, scores) {
 # split() can divide adjusted_score by every factor level. vapply() can then
 # compute one mean for each part and return a named vector with no dimensions.
 summarize_roster <- function(roster) {
-    stop("TODO: implement summarize_roster()")
+    list(
+        rows = nrow(roster),
+        missing_raw = sum(is.na(roster$raw_score)),
+        mean_adjusted = mean(roster$adjusted_score),
+        passed = roster$name[roster$passed],
+        mean_by_group = vapply(split(roster$adjusted_score, roster$group), mean, numeric(1))
+    )
 }
